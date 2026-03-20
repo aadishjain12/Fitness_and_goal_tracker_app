@@ -374,6 +374,86 @@ export function generateProductivityAudit(data: {
   return { score, grade, strengths, bugs, patches, summary };
 }
 
+export interface MicroAlternative {
+  title: string;
+  duration: string;
+  instruction: string;
+  principle: string;
+}
+
+const MICRO_ALTERNATIVES_BADMINTON: MicroAlternative[] = [
+  {
+    title: '2-Min Footwork Drill',
+    duration: '2 minutes',
+    instruction: 'Stand up. Move left-right 10 times, then front-back 10 times in badminton ready stance. Shuffle feet, bend knees.',
+    principle: 'The neural pathway for movement does not require a court — just your motor cortex firing the same pattern.',
+  },
+  {
+    title: 'Shadow Swing Sequence',
+    duration: '2 minutes',
+    instruction: 'Grab any object or just mime it. Do 20 forehand clears, 20 backhand clears, 15 smashes at full extension.',
+    principle: 'Elite athletes visualize and shadow-drill during rest days. You are training the same motor neurons.',
+  },
+  {
+    title: 'Reaction Timer',
+    duration: '2 minutes',
+    instruction: 'Set a 10-second interval timer. React as if receiving a shuttle: step into position and swing on each beep.',
+    principle: 'Agility is a daily practice. Two minutes of reactive movement is infinitely better than zero.',
+  },
+  {
+    title: 'Wrist & Core Activation',
+    duration: '2 minutes',
+    instruction: '30 wrist circles each direction, 15 plank shoulder taps, 10 slow-motion jump squats. Full athletic posture.',
+    principle: 'Badminton injuries happen to neglected supporting muscles. Today, you reinforce the system.',
+  },
+  {
+    title: 'Visualization Session',
+    duration: '2 minutes',
+    instruction: 'Close eyes. In vivid detail, replay your best rally or imagine a perfect match. Feel the racket, hear the shuttle.',
+    principle: 'Neuroscience confirms: the brain cannot distinguish vivid mental rehearsal from physical execution.',
+  },
+];
+
+export function getMicroAlternative(habit: string = 'badminton'): MicroAlternative {
+  const pool = MICRO_ALTERNATIVES_BADMINTON;
+  const idx = Math.floor(Date.now() / 3600000) % pool.length;
+  return pool[idx];
+}
+
+const PM_QUESTIONS: Record<string, string[][]> = {
+  default: [
+    ['How would you prioritize features on a 0-to-1 product with no existing data?', 'Walk me through your go-to metrics framework for measuring product-market fit.', 'A senior engineer disagrees with your roadmap decision. How do you resolve it?'],
+    ['Describe a time you killed a feature you championed. What did you learn?', 'How do you write a PRD for a feature you are uncertain about?', 'What does a great discovery process look like to you?'],
+    ['How do you say no to a stakeholder request without damaging the relationship?', 'Walk me through how you would design an onboarding flow for this company's core product.', 'What's the one metric you would use to define success for this role in the first 90 days?'],
+  ],
+};
+
+const COMPANY_HINTS: Record<string, string[][]> = {
+  google: [
+    ['How would you improve Google Maps' monetization without degrading user trust?', 'Google has a history of killing products. How would you decide when to sunset a feature?', 'Walk me through how you'd design a new Google Workspace feature for hybrid teams.'],
+  ],
+  meta: [
+    ['How would you define and measure the value of a Reels recommendation for Meta?', 'Facebook Groups are declining. What is your 3-year strategy to reverse it?', 'How do you balance advertiser revenue goals with user privacy at Meta?'],
+  ],
+  amazon: [
+    ['Write a press release and FAQ for a new Amazon logistics feature.', 'How would you improve the Amazon Prime value proposition for Gen Z users?', 'Walk me through a customer-obsession example from your past work.'],
+  ],
+  microsoft: [
+    ['How would you integrate Copilot into a Microsoft Teams workflow for frontline workers?', 'What metrics would you track for a Microsoft 365 B2B feature launch?', 'How do you manage a product across a platform with 1B+ users and legacy constraints?'],
+  ],
+};
+
+export function getMockInterviewQuestions(company: string): string[] {
+  const key = company.toLowerCase().trim();
+  let pool: string[][] = [];
+  for (const [k, v] of Object.entries(COMPANY_HINTS)) {
+    if (key.includes(k)) { pool = v; break; }
+  }
+  if (!pool.length) pool = PM_QUESTIONS.default;
+  const set = pool[Math.floor(Date.now() / 3600000) % pool.length];
+  return set;
+}
+
 export function getKanbanTaskOfDay(company: string, position?: string): string {
   const tasks = [
     `Research ${company}'s current product roadmap and identify 2 gaps you would address as PM.`,

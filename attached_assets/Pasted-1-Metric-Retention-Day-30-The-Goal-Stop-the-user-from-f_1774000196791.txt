@@ -1,0 +1,30 @@
+1. Metric: Retention (Day 30+)
+The Goal: Stop the user from "falling off the wagon" after the first week.
+
+The "Habit Stacking" Engine: Instead of just listing a goal like "Badminton," the app suggests a "Trigger." (e.g., "After I finish my 5 PM meeting, I will go to the Badminton court.") This uses the BJ Fogg Behavior Model.
+
+Predictive Relapse Intervention: Since you’re tracking "Quitting Cigarettes," the AI should analyze your "Urge" button clicks. If it sees you click it every Tuesday at 8 PM, it sends a proactive Stoic quote at 7:55 PM before the urge hits.
+
+Smart "Recovery" Mode: When a streak is broken (e.g., you missed Badminton), the app shouldn't just show a "0." It should trigger a "Pivot Protocol." It asks, "Life got in the way—can we do 10 pushups right now instead to keep the momentum?" This prevents the "All-or-Nothing" failure.
+
+2. Metric: Engagement (Daily Active Usage)
+The Goal: Give the user a reason to open the app 5 times a day, not just once.
+
+The "Career Co-Pilot" (for your Job Apps): When a goal status moves to "Interview Scheduled," the app should automatically generate a "15-Minute Mock Interview" using the AI. It scrapes the company name and generates 3 PM-specific questions (e.g., "How would you improve the Google Maps monetization strategy?").
+
+Stoic Journaling Prompts: Instead of just reading a quote, the user must write 2 sentences on how they will apply it. This turns a passive view into an active engagement.
+
+Interactive Health Visualization: For the "Quitting Cigarettes" goal, don't just show a timer. Show a 3D model or a progress bar of "Lung Capacity Recovery" or "Money Saved" in real-time. Watching a "Money Saved" counter go up by pennies every hour is highly addictive.
+
+3. Metric: Delight & UX (Stickiness)
+The Goal: Make the app feel like a premium, "Pro" tool.
+
+The "Shadow" Mode (Privacy): Since you're tracking things like cigarettes or job apps (which can be sensitive), add a "Privacy Toggle" that hides specific goal titles with aliases (e.g., "Cigarettes" becomes "Project Air") when you're using the app in public.
+
+Google Calendar / LinkedIn Integration:
+
+Calendar: Automatically pull in your "Interview Scheduled" dates.
+
+LinkedIn: A "Newsroom" feed that only shows updates from the companies you have in your "Applied" pipeline.
+
+Haptic & Visual "Jackpots": When you hit a 7-day streak, the UI shouldn't just change—the whole screen should undergo a "Ghibli-style" transformation for 5 seconds (referencing your interest in Ghibli art) as a reward.
