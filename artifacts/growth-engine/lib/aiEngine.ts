@@ -424,13 +424,13 @@ const PM_QUESTIONS: Record<string, string[][]> = {
   default: [
     ['How would you prioritize features on a 0-to-1 product with no existing data?', 'Walk me through your go-to metrics framework for measuring product-market fit.', 'A senior engineer disagrees with your roadmap decision. How do you resolve it?'],
     ['Describe a time you killed a feature you championed. What did you learn?', 'How do you write a PRD for a feature you are uncertain about?', 'What does a great discovery process look like to you?'],
-    ['How do you say no to a stakeholder request without damaging the relationship?', 'Walk me through how you would design an onboarding flow for this company's core product.', 'What's the one metric you would use to define success for this role in the first 90 days?'],
+    ["How do you say no to a stakeholder request without damaging the relationship?", "Walk me through how you would design an onboarding flow for this company's core product.", "What's the one metric you would use to define success for this role in the first 90 days?"],
   ],
 };
 
 const COMPANY_HINTS: Record<string, string[][]> = {
   google: [
-    ['How would you improve Google Maps' monetization without degrading user trust?', 'Google has a history of killing products. How would you decide when to sunset a feature?', 'Walk me through how you'd design a new Google Workspace feature for hybrid teams.'],
+    ["How would you improve Google Maps' monetization without degrading user trust?", 'Google has a history of killing products. How would you decide when to sunset a feature?', "Walk me through how you'd design a new Google Workspace feature for hybrid teams."],
   ],
   meta: [
     ['How would you define and measure the value of a Reels recommendation for Meta?', 'Facebook Groups are declining. What is your 3-year strategy to reverse it?', 'How do you balance advertiser revenue goals with user privacy at Meta?'],
