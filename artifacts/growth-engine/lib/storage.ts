@@ -1,17 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export type HabitState = 'victorious' | 'resilient' | 'lapsed';
+
 export interface BadmintonLog {
   date: string;
   completed: boolean;
   reason?: string;
   bounceBackSeen?: boolean;
+  habitState?: HabitState;
+}
+
+export interface EnergyEvent {
+  id: string;
+  date: string;
+  delta: number;
+  source: string;
+  label: string;
 }
 
 export interface JobApp {
   id: string;
   company: string;
   position: string;
-  status: 'applied' | 'interview' | 'offer' | 'rejected';
+  status: 'wishlist' | 'applied' | 'interview' | 'offer' | 'rejected';
   date: string;
   notes?: string;
   taskOfDaySeen?: boolean;
@@ -57,6 +68,10 @@ export interface AppData {
   stoicCommitments: StoicCommitment[];
   todayCommitmentDone: boolean;
   privacy: PrivacySettings;
+  username: string;
+  focusType: string;
+  energyLevel: number;
+  energyEvents: EnergyEvent[];
 }
 
 const STORAGE_KEY = '@growth_engine_v2';
@@ -73,6 +88,10 @@ const DEFAULT_DATA: AppData = {
   stoicCommitments: [],
   todayCommitmentDone: false,
   privacy: { enabled: false, codenames: { badminton: 'Project Agility', cigarettes: 'Project Air', career: 'Project Ascend' } },
+  username: '',
+  focusType: 'Career Switcher',
+  energyLevel: 70,
+  energyEvents: [],
 };
 
 export async function loadData(): Promise<AppData> {
@@ -143,6 +162,40 @@ export function getSmokeFreeTime(start: string | null): {
 
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+export function getResilienceRating(logs: BadmintonLog[]): {
+  rating: number; grade: string; label: string; total: number; victorious: number; resilient: number; lapsed: number;
+} {
+  const logged = logs.filter(l => l.habitState);
+  const total = logged.length;
+  if (total === 0) return { rating: 0, grade: 'N/A', label: 'No data yet', total: 0, victorious: 0, resilient: 0, lapsed: 0 };
+  const victorious = logged.filter(l => l.habitState === 'victorious').length;
+  const resilient = logged.filter(l => l.habitState === 'resilient').length;
+  const lapsed = logged.filter(l => l.habitState === 'lapsed').length;
+  const score = ((victorious * 1 + resilient * 0.6) / total) * 100;
+  const rating = Math.round(score);
+  let grade = 'F';
+  let label = 'Just Starting';
+  if (rating >= 90) { grade = 'S'; label = 'Stoic Master'; }
+  else if (rating >= 75) { grade = 'A'; label = 'Resilient Warrior'; }
+  else if (rating >= 60) { grade = 'B'; label = 'Steady Builder'; }
+  else if (rating >= 45) { grade = 'C'; label = 'In Recovery'; }
+  else if (rating >= 25) { grade = 'D'; label = 'Struggling'; }
+  return { rating, grade, label, total, victorious, resilient, lapsed };
+}
+
+export const ENERGY_VALUES = {
+  badmintonPlayed: 25,
+  badmintonResilient: 12,
+  stoicCommit: 10,
+  addJob: -15,
+  moveToInterview: -20,
+  lapseHabit: -10,
+} as const;
+
+export function clampEnergy(level: number): number {
+  return Math.max(0, Math.min(100, Math.round(level)));
 }
 
 export function getSmokingROI(start: string | null, settings: SmokingSettings): {

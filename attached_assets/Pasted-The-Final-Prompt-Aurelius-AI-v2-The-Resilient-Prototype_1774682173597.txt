@@ -1,0 +1,50 @@
+The Final Prompt: Aurelius AI v2 (The Resilient Prototype)
+Role: You are a Senior Product Engineer and UI Designer.
+Task: Build a high-end, D2C "Life Operating System" called Aurelius AI. This is a React application that uses Local Persistence to simulate a full-stack experience.
+
+1. The Entry & Identity (Simulated Auth)
+Login/Sign-up Page: Create a minimal, beautiful entrance screen. It should ask for a "Username" and "Focus" (e.g., Student, Career Switcher).
+
+Persistence: Save this user profile to localStorage. If I refresh, I should bypass the login and go straight to my dashboard.
+
+Profile Section: A dedicated view showing my "Vitality Stats," my "Resilience Rating" (calculated from goal completion), and my current "Human Battery" level.
+
+2. The Core Mechanic: The Energy Ledger
+Implement a global energyLevel (0-100) that acts as the app's "North Star."
+
+Energy Gainers (+): Logging "Badminton/Sports" (+25) or reading the "Daily Spark" (+10).
+
+Energy Drainers (-): Adding "Job Applications" (-15) or "Interviews" (-40).
+
+Visual: A high-end "Human Battery" pulse meter at the top of the UI.
+
+3. The "Stoic Safety Net" (Anti-Guilt Logic)
+Refactor the goal tracking to prevent "The Guilt Cycle":
+
+Three-State Goals: Each goal can be marked as Victorious (Done), Resilient (Safety Net version), or Lapsed (Missed).
+
+Safety Net Feature: If a user is "Low Energy" (<30%), the app automatically suggests a "5-minute micro-habit" (e.g., "Just put on your badminton shoes and stretch for 5 minutes"). Completing this saves the streak.
+
+4. The Career War Room (D2C Revenue Feature)
+A dedicated Kanban board for job applications.
+
+Columns: Wishlist, Applied, Interviewing, Offer.
+
+AI Mock-up: On "Interviewing" cards, add a "Prep" button. When clicked, it generates 3 PM-specific interview questions based on the company name (simulated with a logic-based helper function).
+
+5. The "Daily Spark" (AI Philosophy)
+Display a daily quote focused on Stoicism and Tech Leadership.
+
+Provide a "Backstory" for each quote that specifically mentions how it applies to the stress of a job hunt or quitting a habit.
+
+6. Design & UX (Essentialist Modern)
+Theme: "Obsidian & Mist." Dark Mode (#121212), ghost-white text, and 1px Slate Gray borders. No shadows—use "Bento Grid" spacing.
+
+Animations: Use framer-motion for page transitions between the Dashboard and the Profile.
+
+Icons: Use lucide-react.
+
+7. Technical Instruction
+Use localStorage to store all user data, habits, and job pipeline stages.
+
+Use a single App.js or a clean component folder structure that I can easily run in Replit.

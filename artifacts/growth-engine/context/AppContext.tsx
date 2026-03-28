@@ -1,15 +1,18 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
-  AppData, BadmintonLog, CustomTask, JobApp, SmokingSettings, PrivacySettings,
-  generateId, getTodayStr, loadData, saveData
+  AppData, BadmintonLog, CustomTask, EnergyEvent, HabitState, JobApp,
+  SmokingSettings, PrivacySettings,
+  ENERGY_VALUES, clampEnergy,
+  generateId, getTodayStr, loadData, saveData,
 } from '@/lib/storage';
 
 interface AppContextType {
   data: AppData;
   isLoading: boolean;
+  completeOnboarding: (username: string, focusType: string) => Promise<void>;
   setSmokeFreeStart: (date: string | null) => Promise<void>;
   updateSmokingSettings: (s: Partial<SmokingSettings>) => Promise<void>;
-  logBadminton: (completed: boolean, reason?: string) => Promise<void>;
+  logBadminton: (state: HabitState, reason?: string) => Promise<void>;
   addJobApp: (app: Omit<JobApp, 'id' | 'date'>) => Promise<void>;
   updateJobApp: (id: string, updates: Partial<JobApp>) => Promise<void>;
   removeJobApp: (id: string) => Promise<void>;
@@ -20,6 +23,7 @@ interface AppContextType {
   commitToday: (commitment: string, quoteAuthor: string) => Promise<void>;
   togglePrivacy: () => Promise<void>;
   updateCodename: (key: string, value: string) => Promise<void>;
+  gainEnergy: (source: keyof typeof ENERGY_VALUES, label: string) => Promise<void>;
   refreshData: () => Promise<void>;
 }
 
@@ -38,6 +42,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     stoicCommitments: [],
     todayCommitmentDone: false,
     privacy: { enabled: false, codenames: { badminton: 'Project Agility', cigarettes: 'Project Air', career: 'Project Ascend' } },
+    username: '',
+    focusType: 'Career Switcher',
+    energyLevel: 70,
+    energyEvents: [],
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -56,6 +64,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await saveData(newData);
   };
 
+  const addEnergyEvent = (d: AppData, source: keyof typeof ENERGY_VALUES, label: string): AppData => {
+    const delta = ENERGY_VALUES[source];
+    const newLevel = clampEnergy(d.energyLevel + delta);
+    const event: EnergyEvent = { id: generateId(), date: new Date().toISOString(), delta, source, label };
+    const events = [event, ...d.energyEvents].slice(0, 50);
+    return { ...d, energyLevel: newLevel, energyEvents: events };
+  };
+
+  const completeOnboarding = async (username: string, focusType: string) => {
+    await persist({ ...data, username, focusType, onboardingDone: true });
+  };
+
   const setSmokeFreeStart = async (date: string | null) => {
     await persist({ ...data, smokeFreeStart: date });
   };
@@ -64,21 +84,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await persist({ ...data, smokingSettings: { ...data.smokingSettings, ...s } });
   };
 
-  const logBadminton = async (completed: boolean, reason?: string) => {
+  const logBadminton = async (state: HabitState, reason?: string) => {
     const today = getTodayStr();
     const filtered = data.badmintonLogs.filter(l => l.date !== today);
-    const newLog: BadmintonLog = { date: today, completed, reason };
-    await persist({ ...data, badmintonLogs: [...filtered, newLog] });
+    const completed = state !== 'lapsed';
+    const newLog: BadmintonLog = { date: today, completed, reason, habitState: state };
+    let updated: AppData = { ...data, badmintonLogs: [...filtered, newLog] };
+    if (state === 'victorious') updated = addEnergyEvent(updated, 'badmintonPlayed', 'Badminton session — Victorious!');
+    else if (state === 'resilient') updated = addEnergyEvent(updated, 'badmintonResilient', 'Pivot Protocol — Neural pathway preserved');
+    else updated = addEnergyEvent(updated, 'lapseHabit', 'Missed session — energy drained');
+    await persist(updated);
   };
 
   const addJobApp = async (app: Omit<JobApp, 'id' | 'date'>) => {
     const newApp: JobApp = { ...app, id: generateId(), date: new Date().toISOString() };
-    await persist({ ...data, jobApps: [...data.jobApps, newApp] });
+    let updated: AppData = { ...data, jobApps: [...data.jobApps, newApp] };
+    if (app.status === 'applied') updated = addEnergyEvent(updated, 'addJob', `Applied to ${app.company}`);
+    await persist(updated);
   };
 
   const updateJobApp = async (id: string, updates: Partial<JobApp>) => {
     const apps = data.jobApps.map(a => a.id === id ? { ...a, ...updates } : a);
-    await persist({ ...data, jobApps: apps });
+    let updated: AppData = { ...data, jobApps: apps };
+    if (updates.status === 'interview') updated = addEnergyEvent(updated, 'moveToInterview', `Interview stage — high stakes`);
+    await persist(updated);
   };
 
   const removeJobApp = async (id: string) => {
@@ -110,7 +139,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const today = getTodayStr();
     const filtered = data.stoicCommitments.filter(c => c.date !== today);
     const newCommitment = { date: today, quoteAuthor, commitment };
-    await persist({ ...data, stoicCommitments: [...filtered, newCommitment], todayCommitmentDone: true });
+    let updated: AppData = { ...data, stoicCommitments: [...filtered, newCommitment], todayCommitmentDone: true };
+    updated = addEnergyEvent(updated, 'stoicCommit', 'Daily Spark committed');
+    await persist(updated);
   };
 
   const togglePrivacy = async () => {
@@ -121,14 +152,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await persist({ ...data, privacy: { ...data.privacy, codenames: { ...data.privacy.codenames, [key]: value } } });
   };
 
+  const gainEnergy = async (source: keyof typeof ENERGY_VALUES, label: string) => {
+    const updated = addEnergyEvent(data, source, label);
+    await persist(updated);
+  };
+
   return (
     <AppContext.Provider value={{
-      data, isLoading, setSmokeFreeStart, updateSmokingSettings,
+      data, isLoading,
+      completeOnboarding, setSmokeFreeStart, updateSmokingSettings,
       logBadminton,
       addJobApp, updateJobApp, removeJobApp,
       addTask, toggleTask, removeTask,
       saveAuditReport, commitToday, togglePrivacy, updateCodename,
-      refreshData,
+      gainEnergy, refreshData,
     }}>
       {children}
     </AppContext.Provider>

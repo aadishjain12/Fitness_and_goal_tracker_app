@@ -19,13 +19,14 @@ import { JobApp, applyPrivacy } from "@/lib/storage";
 import { getKanbanTaskOfDay, getMockInterviewQuestions } from "@/lib/aiEngine";
 
 const STATUS_CONFIG = {
+  wishlist: { label: 'Wishlist', color: Colors.purple ?? '#A78BFA', bgColor: '#A78BFA15', icon: 'bookmark' as const },
   applied: { label: 'Applied', color: Colors.accent, bgColor: Colors.accentDim, icon: 'send' as const },
   interview: { label: 'Interview', color: Colors.gold, bgColor: Colors.goldDim, icon: 'user' as const },
   offer: { label: 'Offer', color: Colors.green, bgColor: Colors.greenDim, icon: 'award' as const },
   rejected: { label: 'Rejected', color: Colors.red, bgColor: Colors.redDim, icon: 'x-circle' as const },
 };
 
-const STATUS_ORDER: JobApp['status'][] = ['applied', 'interview', 'offer', 'rejected'];
+const STATUS_ORDER: JobApp['status'][] = ['wishlist', 'applied', 'interview', 'offer', 'rejected'];
 
 function MockInterviewModal({
   visible, company, questions, onClose,

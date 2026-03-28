@@ -1,0 +1,52 @@
+The Master Prompt: Aurelius AI v3.0 (Production-Ready)
+Role: You are a Senior Full-Stack Engineer and Product Architect.
+Objective: Build Aurelius AI v3.0, a production-ready React application with a secure Authentication layer and a persistent Database. The goal is a seamless, high-end D2C experience.
+
+1. Authentication & Persistence (The Foundation)
+Auth Flow: Implement a clean, minimal Login/Sign-up page using Supabase Auth or Firebase Auth.
+
+Database: Connect the application to a cloud database (PostgreSQL via Supabase or Firestore).
+
+Data Persistence: Ensure every goal, energy log, and job application is tied to the user_id. When I log in from any device, my specific data (Badminton streaks, cigarette-free timer, job pipeline) must be perfectly synced.
+
+2. The "Profile Dossier" Section
+Create a dedicated Profile page that serves as the user's "Productivity Command Center."
+
+Identity: Display Name, Bio (e.g., "Aspiring Product Manager"), and Profile Picture.
+
+The "Vitality Score": A high-level dashboard showing:
+
+Current Energy Battery: (Real-time sync with the Energy Ledger).
+
+Resilience Rating: A percentage based on how often I use the "Safety Net" instead of failing.
+
+Career Momentum: Number of active applications and scheduled interviews.
+
+Settings: Toggle for "Privacy Mode" (masks sensitive goals) and "Dark/Light Mode."
+
+3. Refined Feature Set (Integrated with Database)
+Energy Ledger v2: Global energyLevel (0-100).
+
+Gainers: Badminton (+25), Daily Spark (+10).
+
+Drainers: Job App (-15), Interview (-50), Habit Lapse (-30).
+
+The Stoic Safety Net: Three-state tracking (Victorious / Resilient / Lapsed). "Resilient" states must trigger a 5-minute micro-habit to protect the streak.
+
+The Career War Room: A Kanban pipeline (Wishlist → Applied → Interviewing → Offer).
+
+AI Feature: A "Mock Interview" button on interview cards that generates 3 company-specific PM questions.
+
+4. Design & UI (Modern Essentialism)
+Theme: "Obsidian & Mist." Deep Charcoal (#121212) background, 1px Slate Gray borders.
+
+Layout: A unified Bento Grid dashboard.
+
+Onboarding: A 3-screen walkthrough explaining the "Energy Ledger" and "Safety Net" concepts before the user reaches the dashboard.
+
+5. Technical Stack
+Frontend: React, Tailwind CSS, Lucide-React.
+
+Backend/Auth: Supabase (preferred) or Firebase.
+
+Animations: Framer Motion for premium feel.

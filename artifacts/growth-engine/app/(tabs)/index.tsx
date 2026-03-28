@@ -267,6 +267,25 @@ function LockedOverlay({ onPress }: { onPress: () => void }) {
   );
 }
 
+function BatteryStrip({ level }: { level: number }) {
+  const color = level >= 60 ? Colors.green : level >= 30 ? Colors.gold : Colors.red;
+  const label = level >= 80 ? 'Peak' : level >= 60 ? 'Energised' : level >= 40 ? 'Moderate' : level >= 20 ? 'Low' : 'Critical';
+  const blocks = 10;
+  const filled = Math.round((level / 100) * blocks);
+  return (
+    <View style={styles.batteryStrip}>
+      <Feather name="battery" size={13} color={color} />
+      <View style={styles.batteryBlocks}>
+        {Array.from({ length: blocks }).map((_, i) => (
+          <View key={i} style={[styles.batteryBlock, { backgroundColor: i < filled ? color : Colors.surface }]} />
+        ))}
+      </View>
+      <Text style={[styles.batteryPct, { color }]}>{level}%</Text>
+      <Text style={styles.batteryStateLabel}>{label}</Text>
+    </View>
+  );
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { data, commitToday, togglePrivacy } = useApp();
@@ -292,7 +311,7 @@ export default function HomeScreen() {
       >
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.greeting}>Good {getGreeting()},</Text>
+            <Text style={styles.greeting}>Good {getGreeting()}{data.username ? `, ${data.username}` : ''},</Text>
             <Text style={styles.headline}>Command Center</Text>
           </View>
           <View style={styles.headerActions}>
@@ -331,6 +350,7 @@ export default function HomeScreen() {
           <LockedOverlay onPress={() => {}} />
         ) : (
           <>
+            <BatteryStrip level={data.energyLevel} />
             <SmokeFreeWidget smokeFreeStart={data.smokeFreeStart} />
             <QuickStats
               streakCurrent={current}
@@ -556,4 +576,14 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
   legendText: { fontSize: 11, color: Colors.textMuted, fontFamily: 'Inter_400Regular' },
+
+  batteryStrip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: Colors.bgCard, borderWidth: 1, borderColor: Colors.border,
+    borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 12,
+  },
+  batteryBlocks: { flex: 1, flexDirection: 'row', gap: 3 },
+  batteryBlock: { flex: 1, height: 10, borderRadius: 2 },
+  batteryPct: { fontSize: 13, fontFamily: 'Inter_700Bold' },
+  batteryStateLabel: { fontSize: 11, color: Colors.textMuted, fontFamily: 'Inter_400Regular' },
 });

@@ -27,6 +27,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "checkmark.circle", selected: "checkmark.circle.fill" }} />
         <Label>Tasks</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile">
+        <Icon sf={{ default: "person.circle", selected: "person.circle.fill" }} />
+        <Label>Profile</Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
@@ -62,11 +66,7 @@ function ClassicTabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="house" tintColor={color} size={24} />
-            ) : (
-              <Feather name="home" size={22} color={color} />
-            ),
+            isIOS ? <SymbolView name="house" tintColor={color} size={24} /> : <Feather name="home" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -74,11 +74,7 @@ function ClassicTabLayout() {
         options={{
           title: "Habits",
           tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="figure.run" tintColor={color} size={24} />
-            ) : (
-              <MaterialCommunityIcons name="badminton" size={22} color={color} />
-            ),
+            isIOS ? <SymbolView name="figure.run" tintColor={color} size={24} /> : <MaterialCommunityIcons name="badminton" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -86,11 +82,7 @@ function ClassicTabLayout() {
         options={{
           title: "Career",
           tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="briefcase" tintColor={color} size={24} />
-            ) : (
-              <Feather name="briefcase" size={22} color={color} />
-            ),
+            isIOS ? <SymbolView name="briefcase" tintColor={color} size={24} /> : <Feather name="briefcase" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -98,11 +90,15 @@ function ClassicTabLayout() {
         options={{
           title: "Tasks",
           tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="checkmark.circle" tintColor={color} size={24} />
-            ) : (
-              <Feather name="check-circle" size={22} color={color} />
-            ),
+            isIOS ? <SymbolView name="checkmark.circle" tintColor={color} size={24} /> : <Feather name="check-circle" size={22} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) =>
+            isIOS ? <SymbolView name="person.circle" tintColor={color} size={24} /> : <Feather name="user" size={22} color={color} />,
         }}
       />
     </Tabs>

@@ -198,38 +198,49 @@ export default function HabitsScreen() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [pendingReason, setPendingReason] = useState('');
 
-  const { current, best, todayLogged } = getStreakInfo(data.badmintonLogs);
-  const todayLog = data.badmintonLogs.find(l => l.date === new Date().toISOString().slice(0, 10));
+  const { current, best } = getStreakInfo(data.badmintonLogs);
+  const today = new Date().toISOString().slice(0, 10);
+  const todayLog = data.badmintonLogs.find(l => l.date === today);
   const smokeFreeTime = getSmokeFreeTime(data.smokeFreeStart);
   const roi = getSmokingROI(data.smokeFreeStart, data.smokingSettings);
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const lowEnergy = data.energyLevel < 30;
+  const alreadyLogged = !!todayLog?.habitState;
 
-  const onPlayedToday = async () => {
+  const onVictorious = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    await logBadminton(true);
+    await logBadminton('victorious');
   };
 
-  const onMissedToday = () => {
+  const onResilient = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await logBadminton('resilient', 'Safety Net — micro-alternative completed');
+    setShowPivotModal(true);
+  };
+
+  const onLapsed = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setShowMissModal(true);
   };
 
   const onMissSubmit = async (reason: string) => {
     setShowMissModal(false);
-    await logBadminton(false, reason);
+    await logBadminton('lapsed', reason);
     setPendingReason(reason);
-    setShowPivotModal(true);
+    setTimeout(() => {
+      router.push({ pathname: '/modals/bounceBack', params: { reason } });
+    }, 300);
   };
 
   const onPivotComplete = () => {
     setShowPivotModal(false);
-    router.push({ pathname: '/modals/bounceBack', params: { reason: pendingReason } });
   };
 
-  const onPivotSkip = () => {
-    setShowPivotModal(false);
-    router.push({ pathname: '/modals/bounceBack', params: { reason: pendingReason } });
-  };
+  const onPivotSkip = () => setShowPivotModal(false);
+
+  const STATE_COLOR = { victorious: Colors.green, resilient: Colors.gold, lapsed: Colors.red };
+  const STATE_ICON = { victorious: 'award', resilient: 'shield', lapsed: 'x-circle' } as const;
+  const STATE_LABEL = { victorious: 'Victorious', resilient: 'Resilient', lapsed: 'Lapsed' };
 
   return (
     <View style={styles.container}>
@@ -294,46 +305,88 @@ export default function HabitsScreen() {
 
         <View style={styles.todaySection}>
           <Text style={styles.todayLabel}>Log Today</Text>
-          <View style={styles.logButtons}>
-            <Pressable
-              onPress={onPlayedToday}
-              disabled={todayLog?.completed === true}
-              style={({ pressed }) => [
-                styles.logBtn, styles.logBtnGreen,
-                (todayLog?.completed === true) && styles.logBtnActive,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <Feather name="check" size={20} color={todayLog?.completed ? Colors.bg : Colors.green} />
-              <Text style={[styles.logBtnText, { color: todayLog?.completed ? Colors.bg : Colors.green }]}>
-                Played Today
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={onMissedToday}
-              disabled={todayLog?.completed === false}
-              style={({ pressed }) => [
-                styles.logBtn, styles.logBtnRed,
-                (todayLog?.completed === false) && styles.logBtnMissedActive,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <Feather name="x" size={20} color={Colors.red} />
-              <Text style={[styles.logBtnText, { color: Colors.red }]}>Missed</Text>
-            </Pressable>
-          </View>
 
-          {todayLog?.completed === false && (
-            <View style={styles.pivotProtocolTag}>
-              <Feather name="zap" size={12} color={Colors.orange} />
-              <Text style={styles.pivotProtocolTagText}>Pivot Protocol activated — neural pathway preserved.</Text>
+          {/* Safety Net Banner — shown when energy < 30% and not yet logged */}
+          {lowEnergy && !alreadyLogged && (
+            <View style={styles.safetyNetBanner}>
+              <View style={styles.safetyNetHeader}>
+                <Feather name="zap" size={14} color={Colors.orange} />
+                <Text style={styles.safetyNetTitle}>Safety Net Active — Energy Critical</Text>
+              </View>
+              <Text style={styles.safetyNetText}>
+                Your Human Battery is at {data.energyLevel}%. A full session may not be realistic. Try the micro-alternative (Resilient) to keep your neural pathway alive — your streak is preserved.
+              </Text>
             </View>
           )}
 
-          {todayLog?.completed === false && todayLog.reason && (
-            <View style={styles.missReasonTag}>
-              <Feather name="alert-circle" size={12} color={Colors.red} />
-              <Text style={styles.missReasonText}>Reason: {todayLog.reason}</Text>
+          {/* Already logged state */}
+          {alreadyLogged && todayLog?.habitState ? (
+            <View style={[styles.loggedState, { borderColor: STATE_COLOR[todayLog.habitState] + '50', backgroundColor: STATE_COLOR[todayLog.habitState] + '12' }]}>
+              <Feather name={STATE_ICON[todayLog.habitState]} size={22} color={STATE_COLOR[todayLog.habitState]} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.loggedStateTitle, { color: STATE_COLOR[todayLog.habitState] }]}>
+                  {STATE_LABEL[todayLog.habitState]}
+                </Text>
+                <Text style={styles.loggedStateSub}>
+                  {todayLog.habitState === 'victorious'
+                    ? 'Full session completed. Energy +25.'
+                    : todayLog.habitState === 'resilient'
+                    ? 'Micro-alternative done. Streak saved. Energy +12.'
+                    : `Logged lapsed. Energy −10. ${todayLog.reason ? `Reason: ${todayLog.reason}` : ''}`}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            /* Three-state buttons */
+            <View style={styles.threeStateButtons}>
+              {/* Victorious */}
+              <Pressable
+                onPress={onVictorious}
+                style={({ pressed }) => [styles.stateBtn, styles.stateBtnVictorious, pressed && { opacity: 0.8 }]}
+              >
+                <Feather name="award" size={20} color={Colors.green} />
+                <Text style={[styles.stateBtnLabel, { color: Colors.green }]}>Victorious</Text>
+                <Text style={styles.stateBtnSub}>Full session{'\n'}+25 ⚡</Text>
+              </Pressable>
+
+              {/* Resilient — highlighted when low energy */}
+              <Pressable
+                onPress={onResilient}
+                style={({ pressed }) => [
+                  styles.stateBtn, styles.stateBtnResilient,
+                  lowEnergy && styles.stateBtnResilientHighlight,
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                {lowEnergy && (
+                  <View style={styles.safetyNetBadge}>
+                    <Text style={styles.safetyNetBadgeText}>RECOMMENDED</Text>
+                  </View>
+                )}
+                <Feather name="shield" size={20} color={Colors.gold} />
+                <Text style={[styles.stateBtnLabel, { color: Colors.gold }]}>Resilient</Text>
+                <Text style={styles.stateBtnSub}>Micro-alt{'\n'}+12 ⚡</Text>
+              </Pressable>
+
+              {/* Lapsed */}
+              <Pressable
+                onPress={onLapsed}
+                style={({ pressed }) => [styles.stateBtn, styles.stateBtnLapsed, pressed && { opacity: 0.8 }]}
+              >
+                <Feather name="x-circle" size={20} color={Colors.red} />
+                <Text style={[styles.stateBtnLabel, { color: Colors.red }]}>Lapsed</Text>
+                <Text style={styles.stateBtnSub}>Missed{'\n'}−10 ⚡</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {/* State legend */}
+          {!alreadyLogged && (
+            <View style={styles.stateLegend}>
+              <Feather name="info" size={11} color={Colors.textMuted} />
+              <Text style={styles.stateLegendText}>
+                Resilient = micro-alternative done (streak preserved). Lapsed = fully missed.
+              </Text>
             </View>
           )}
         </View>
@@ -481,6 +534,45 @@ const styles = StyleSheet.create({
     padding: 18, marginBottom: 8,
   },
   todayLabel: { fontSize: 14, color: Colors.textSub, fontFamily: 'Inter_600SemiBold', marginBottom: 12 },
+  safetyNetBanner: {
+    backgroundColor: Colors.orangeDim, borderWidth: 1,
+    borderColor: Colors.orange + '40', borderRadius: 14,
+    padding: 12, marginBottom: 12,
+  },
+  safetyNetHeader: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 6 },
+  safetyNetTitle: { fontSize: 13, color: Colors.orange, fontFamily: 'Inter_700Bold', flex: 1 },
+  safetyNetText: { fontSize: 12, color: Colors.orange, fontFamily: 'Inter_400Regular', lineHeight: 17, opacity: 0.9 },
+
+  loggedState: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderWidth: 1, borderRadius: 14, padding: 14,
+  },
+  loggedStateTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 2 },
+  loggedStateSub: { fontSize: 12, color: Colors.textSub, fontFamily: 'Inter_400Regular', lineHeight: 17 },
+
+  threeStateButtons: { flexDirection: 'row', gap: 8, marginBottom: 10 },
+  stateBtn: {
+    flex: 1, borderWidth: 1, borderRadius: 14, padding: 12,
+    alignItems: 'center', gap: 6, position: 'relative', overflow: 'hidden',
+  },
+  stateBtnVictorious: { borderColor: Colors.green + '50', backgroundColor: Colors.greenDim },
+  stateBtnResilient: { borderColor: Colors.gold + '50', backgroundColor: Colors.goldDim },
+  stateBtnResilientHighlight: { borderColor: Colors.orange, borderWidth: 2 },
+  stateBtnLapsed: { borderColor: Colors.red + '40', backgroundColor: Colors.redDim },
+  stateBtnLabel: { fontSize: 13, fontFamily: 'Inter_700Bold' },
+  stateBtnSub: { fontSize: 10, color: Colors.textMuted, fontFamily: 'Inter_400Regular', textAlign: 'center', lineHeight: 14 },
+
+  safetyNetBadge: {
+    position: 'absolute', top: 0, left: 0, right: 0,
+    backgroundColor: Colors.orange, paddingVertical: 2,
+  },
+  safetyNetBadgeText: { fontSize: 8, color: Colors.bg, fontFamily: 'Inter_700Bold', textAlign: 'center', letterSpacing: 0.5 },
+
+  stateLegend: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 5, marginTop: 4,
+  },
+  stateLegendText: { flex: 1, fontSize: 10, color: Colors.textMuted, fontFamily: 'Inter_400Regular', lineHeight: 14 },
+
   logButtons: { flexDirection: 'row', gap: 10 },
   logBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center',
